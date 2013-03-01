@@ -16,16 +16,6 @@ module StackOverflow
       @skill = target_skill
     end
 
-    def get
-        begin
-          prepare_resource
-          JSON::parse(RestClient.get resource, (set_params skill))
-        rescue => e
-          error = JSON::parse(e.response)
-          raise IPThrottleError, (parse_error_message error) if error["error_id"] == 502
-          raise message
-        end
-    end
 
     def get_skills
       Hashie::Mash.new(get).items.map do |stuff|
@@ -34,6 +24,17 @@ module StackOverflow
     end
 
     private
+
+    def get
+      begin
+        prepare_resource
+        JSON::parse(RestClient.get resource, (set_params skill))
+      rescue => e
+        error = JSON::parse(e.response)
+        raise IPThrottleError, (parse_error_message error) if error["error_id"] == 502
+        raise message
+      end
+    end
 
     def prepare_resource
       skill.strip!
